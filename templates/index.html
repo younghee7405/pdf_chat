@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF 챗봇 - RAG 기반 질의응답 시스템</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-robot"></i> PDF 전문 챗봇</h1>
+                <p class="subtitle">RAG 기반 문서 질의응답 시스템</p>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <!-- 왼쪽: PDF 관리 패널 -->
+            <aside class="sidebar">
+                <div class="pdf-management">
+                    <h2><i class="fas fa-file-pdf"></i> PDF 관리</h2>
+                    
+                    <!-- PDF 업로드 -->
+                    <div class="upload-section">
+                        <label for="pdf-upload" class="upload-btn">
+                            <i class="fas fa-upload"></i> PDF 업로드
+                            <input type="file" id="pdf-upload" accept=".pdf" hidden>
+                        </label>
+                    </div>
+
+                    <!-- 기존 PDF 목록 -->
+                    <div class="pdf-list">
+                        <h3>업로드된 PDF</h3>
+                        {% if pdf_files %}
+                        <ul id="pdf-list-items">
+                            {% for pdf in pdf_files %}
+                            <li class="pdf-item" data-filename="{{ pdf }}">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>{{ pdf }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="empty-message">업로드된 PDF가 없습니다.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- 현재 PDF 정보 -->
+                    <div id="current-pdf-info" class="pdf-info" style="display: none;">
+                        <h3>현재 문서</h3>
+                        <div class="info-content">
+                            <p><strong>파일명:</strong> <span id="pdf-filename">-</span></p>
+                            <p><strong>총 페이지:</strong> <span id="pdf-pages">-</span></p>
+                            <p><strong>청크 수:</strong> <span id="pdf-chunks">-</span></p>
+                        </div>
+                        <div class="status-badge">
+                            <i class="fas fa-check-circle"></i> 준비 완료
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 중앙: 채팅 영역 -->
+            <section class="chat-section">
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="welcome-message">
+                            <div class="welcome-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h2>PDF 챗봇에 오신 것을 환영합니다!</h2>
+                            <p>PDF 문서를 업로드하고 질문해보세요.</p>
+                            <div class="features">
+                                <div class="feature-item">
+                                    <i class="fas fa-search"></i>
+                                    <span>RAG 기반 검색</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-image"></i>
+                                    <span>페이지 이미지 제공</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-list-ol"></i>
+                                    <span>단계별 설명</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 입력 영역 -->
+                    <div class="chat-input-container">
+                        <form id="chat-form">
+                            <div class="input-wrapper">
+                                <input 
+                                    type="text" 
+                                    id="question-input" 
+                                    placeholder="질문을 입력하세요..." 
+                                    disabled
+                                >
+                                <button type="submit" id="send-btn" disabled>
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 오른쪽: 참조 정보 패널 -->
+            <aside class="reference-panel" id="reference-panel" style="display: none;">
+                <h2><i class="fas fa-book-open"></i> 참조 정보</h2>
+                
+                <!-- 참조 페이지 -->
+                <div class="reference-section">
+                    <h3>참조 페이지</h3>
+                    <div id="reference-pages" class="reference-pages">
+                        <!-- 동적으로 생성 -->
+                    </div>
+                </div>
+
+                <!-- 검색된 청크 -->
+                <div class="reference-section">
+                    <h3>검색된 문서 조각</h3>
+                    <div id="source-chunks" class="source-chunks">
+                        <!-- 동적으로 생성 -->
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p id="loading-text">처리 중...</p>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+
