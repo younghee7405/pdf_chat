@@ -265,9 +265,12 @@ function addBotMessage(data) {
     
     let contentHTML = '';
     
-    // 카테고리별로 표시
+    // 카테고리별로만 표시 (중복 방지)
+    let hasCategories = false;
+    
     if (data.categories) {
         if (data.categories.overview) {
+            hasCategories = true;
             contentHTML += `
                 <div class="answer-category">
                     <div class="category-title">
@@ -280,6 +283,7 @@ function addBotMessage(data) {
         }
         
         if (data.categories.steps) {
+            hasCategories = true;
             contentHTML += `
                 <div class="answer-category">
                     <div class="category-title">
@@ -292,6 +296,7 @@ function addBotMessage(data) {
         }
         
         if (data.categories.notes) {
+            hasCategories = true;
             contentHTML += `
                 <div class="answer-category">
                     <div class="category-title">
@@ -304,8 +309,8 @@ function addBotMessage(data) {
         }
     }
     
-    // 전체 답변이 카테고리로 나누어지지 않은 경우
-    if (!contentHTML) {
+    // 카테고리가 없을 때만 전체 답변 표시
+    if (!hasCategories) {
         contentHTML = `<div class="category-content">${formatText(data.answer)}</div>`;
     }
     
